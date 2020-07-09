@@ -71,6 +71,11 @@ if(MSVC)
   endforeach(flag_var)
 endif(MSVC)
 
+set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
+if(NOT DEFINED FXDIV_SOURCE_DIR)
+  set(FXDIV_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/FXdiv" CACHE STRING "FXdiv source directory")
+endif()
+
 # ---[ Threads
 include(${CMAKE_CURRENT_LIST_DIR}/public/threads.cmake)
 if(TARGET Threads::Threads)
@@ -244,22 +249,8 @@ if(USE_NNPACK OR USE_QNNPACK OR USE_PYTORCH_QNNPACK OR USE_XNNPACK)
     set(USE_PYTORCH_QNNPACK OFF)
     set(USE_XNNPACK OFF)
   else()
-    set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
-
-    if(NOT DEFINED CPUINFO_SOURCE_DIR)
-      set(CPUINFO_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/cpuinfo" CACHE STRING "cpuinfo source directory")
-    endif()
-    if(NOT DEFINED FP16_SOURCE_DIR)
-      set(FP16_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/FP16" CACHE STRING "FP16 source directory")
-    endif()
-    if(NOT DEFINED FXDIV_SOURCE_DIR)
-      set(FXDIV_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/FXdiv" CACHE STRING "FXdiv source directory")
-    endif()
     if(NOT DEFINED PSIMD_SOURCE_DIR)
       set(PSIMD_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/psimd" CACHE STRING "PSimd source directory")
-    endif()
-    if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
-      set(PTHREADPOOL_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/pthreadpool" CACHE STRING "pthreadpool source directory")
     endif()
 
     set(CPUINFO_LIBRARY_TYPE "static" CACHE STRING "")
@@ -301,7 +292,6 @@ if(NOT USE_SYSTEM_PTHREADPOOL AND (INTERN_BUILD_MOBILE OR NOT DISABLE_NNPACK_AND
     set(USE_INTERNAL_PTHREADPOOL_IMPL OFF CACHE BOOL "" FORCE)
 
     if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
-      set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
       set(PTHREADPOOL_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/pthreadpool" CACHE STRING "pthreadpool source directory")
     endif()
 
@@ -335,7 +325,7 @@ if(NOT TARGET cpuinfo AND USE_SYSTEM_CPUINFO)
   set_target_properties(cpuinfo PROPERTIES IMPORTED_LOCATION "${CPUINFO_LIBRARY}")
 elseif(NOT TARGET cpuinfo)
   if(NOT DEFINED CPUINFO_SOURCE_DIR)
-    set(CPUINFO_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../third_party/cpuinfo" CACHE STRING "cpuinfo source directory")
+    set(CPUINFO_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/cpuinfo" CACHE STRING "cpuinfo source directory")
   endif()
 
   set(CPUINFO_BUILD_TOOLS OFF CACHE BOOL "")
@@ -364,8 +354,6 @@ list(APPEND Caffe2_DEPENDENCY_LIBS cpuinfo)
 
 # ---[ QNNPACK
 if(USE_QNNPACK)
-  set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
-
   if(NOT DEFINED QNNPACK_SOURCE_DIR)
     set(QNNPACK_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/QNNPACK" CACHE STRING "QNNPACK source directory")
   endif()
@@ -392,7 +380,6 @@ endif()
 
 # ---[ Caffe2 Int8 operators (enabled by USE_QNNPACK) depend on gemmlowp and neon2sse headers
 if(USE_QNNPACK)
-  set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
   include_directories(SYSTEM "${CAFFE2_THIRD_PARTY_ROOT}/gemmlowp")
   include_directories(SYSTEM "${CAFFE2_THIRD_PARTY_ROOT}/neon2sse")
 endif()
@@ -599,7 +586,6 @@ endif()
 
 # ---[ FBGEMM
 if(USE_FBGEMM)
-  set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
   if(NOT DEFINED FBGEMM_SOURCE_DIR)
     set(FBGEMM_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/fbgemm" CACHE STRING "FBGEMM source directory")
   endif()
@@ -638,7 +624,6 @@ if(USE_FBGEMM)
 endif()
 
 if(USE_FBGEMM)
-  set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
   include_directories(SYSTEM "${CAFFE2_THIRD_PARTY_ROOT}")
   caffe2_update_option(USE_FBGEMM ON)
 else()
@@ -768,7 +753,7 @@ endif()
 # ---[ Caffe2 depends on FP16 library for half-precision conversions
 if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
   if(NOT DEFINED FP16_SOURCE_DIR)
-    set(FP16_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../third_party/FP16" CACHE STRING "FP16 source directory")
+    set(FP16_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/FP16" CACHE STRING "FP16 source directory")
   endif()
 
   set(FP16_BUILD_TESTS OFF CACHE BOOL "")
