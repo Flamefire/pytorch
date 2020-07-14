@@ -238,6 +238,10 @@ def run_test(executable, test_module, test_directory, options, *extra_unittest_a
     # in `if __name__ == '__main__': `. So call `python test_*.py` instead.
     argv = [test_module + '.py'] + unittest_args + list(extra_unittest_args)
 
+    # Extra arguments are not supported with pytest
+    if list(extra_unittest_args) and executable[-1] == 'pytest':
+        executable = executable[0:-2]
+
     command = executable + argv
     return shell(command, test_directory)
 
