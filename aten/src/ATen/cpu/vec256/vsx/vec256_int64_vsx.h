@@ -170,7 +170,7 @@ class Vec256<int64_t> {
   int64_t& operator[](int idx) = delete;
 
   Vec256<int64_t> angle() const {
-    return Vec256<int64_t>{0};
+    return blendv(Vec256<int64_t>(0), Vec256<int64_t>(c10::pi<int64_t>), *this < Vec256<int64_t>(0));
   }
   Vec256<int64_t> real() const {
     return *this;

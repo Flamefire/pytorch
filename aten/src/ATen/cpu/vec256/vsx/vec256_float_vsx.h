@@ -282,7 +282,8 @@ class Vec256<float> {
   }
 
   Vec256<float> angle() const {
-    return Vec256<float>{0};
+    auto tmp = blendv(Vec256<float>(0), Vec256<float>(c10::pi<float>), *this < Vec256<float>(0));
+    return blendv(tmp, *this, _isnan());
   }
   Vec256<float> real() const {
     return *this;
