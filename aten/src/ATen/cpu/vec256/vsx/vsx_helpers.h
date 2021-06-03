@@ -85,6 +85,22 @@ vec_sldw_aux(const vfloat32& vec_in0, const vfloat32& vec_in1) {
 
 #define vec_not(a) vec_nor(a, a)
 
+#define C10_VSX_VEC_NAN_PROPAG(name, type, btype, func)       \
+  C10_ALWAYS_INLINE type name(const type& a, const type& b) { \
+    type tmp = func(a, b);                                    \
+    btype nan_a = vec_cmpne(a, a);                            \
+    btype nan_b = vec_cmpne(b, b);                            \
+    tmp = vec_sel(tmp, a, nan_a);                             \
+    return vec_sel(tmp, b, nan_b);                            \
+  }
+
+C10_VSX_VEC_NAN_PROPAG(vec_min_nan, vfloat32, vbool32, vec_min)
+C10_VSX_VEC_NAN_PROPAG(vec_max_nan, vfloat32, vbool32, vec_max)
+C10_VSX_VEC_NAN_PROPAG(vec_min_nan, vfloat64, vbool64, vec_min)
+C10_VSX_VEC_NAN_PROPAG(vec_max_nan, vfloat64, vbool64, vec_max)
+
+#undef C10_VSX_VEC_NAN_PROPAG
+
 #define DEFINE_MEMBER_UNARY_OP(op, op_type, func)     \
   Vec256<op_type> C10_ALWAYS_INLINE op() const {      \
     return Vec256<op_type>{func(_vec0), func(_vec1)}; \
@@ -136,21 +152,17 @@ vec_sldw_aux(const vfloat32& vec_in0, const vfloat32& vec_in1) {
       const Vec256<operand_type>& a,                                    \
       const Vec256<operand_type>& min,                                  \
       const Vec256<operand_type>& max) {                                \
-    return Vec256<operand_type>{                                        \
-        vec_min(max.vec0(), vec_max(a.vec0(), min.vec0())),             \
-        vec_min(max.vec1(), vec_max(a.vec1(), min.vec1()))};            \
+    return max.minimum(a.maximum(min));                                 \
   }                                                                     \
   template <>                                                           \
   Vec256<operand_type> C10_ALWAYS_INLINE clamp_min(                     \
       const Vec256<operand_type>& a, const Vec256<operand_type>& min) { \
-    return Vec256<operand_type>{                                        \
-        vec_max(a.vec0(), min.vec0()), vec_max(a.vec1(), min.vec1())};  \
+    return a.maximum(min);                                              \
   }                                                                     \
   template <>                                                           \
   Vec256<operand_type> C10_ALWAYS_INLINE clamp_max(                     \
       const Vec256<operand_type>& a, const Vec256<operand_type>& max) { \
-    return Vec256<operand_type>{                                        \
-        vec_min(a.vec0(), max.vec0()), vec_min(a.vec1(), max.vec1())};  \
+    return a.minimum(max);                                              \
   }
 
 #define DEFINE_REINTERPRET_CAST_FUNCS(                             \
